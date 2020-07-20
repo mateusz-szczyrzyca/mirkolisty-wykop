@@ -18,7 +18,7 @@ option_list = {
     "how_many_last_posts_to_analyze": None,
     "how_many_upvotes_for_recent_posts": None,
     "how_many_upvotes_needed_for_prolonged_call": None,
-    "no_detail_report": None,
+    "detail_report": None,
     "baseurl_post": None,
     "voters_endpoint": None,
     "postid_regex": None,
@@ -118,7 +118,7 @@ try:
     usernames = ' @'.join(to_call_usernames)
     analyzed_posts_report = ', '.join(posts)
 
-    if option_list.get('no_detail_report') == 'off':
+    if option_list.get('detail_report') == 'off':
         post_message_with_call = usernames
     else:
         post_message_with_call = f'''
