@@ -1,20 +1,15 @@
 Only for Polish website and polish users
 
-
-
 ## Co to jest
 
 Skrypt do generowania wiadomości "wołania" w serwisie wykop.pl na podstawie analizy danych wpisów 
-pod danym tagiem. Wygenerowaną przez niego wiadomość należy później wkleić do wpisu w wątku.
+pod danym tagiem. Wygenerowaną przez niego wiadomość należy później wkleić do wpisu w wątku na mirkoblogu.
 Zrobiony celem zastąpienia mirkolist.
 
 Skrypt domyślnie stworzony i ustawiony pod wpisy dla tagu [#devopsiarz](https://www.wykop.pl/tag/devopsiarz/), 
-ale edytując `mirkolisty.conf` można wpłynąć na tag jak i "tuningować" algorytm dla innych tagów.
+ale edytując `mirkolisty.conf` można wpłynąć na tag jak i konfigurować algorytm dla innych tagów.
 
 Zobacz do pliku `mirkolisty.conf`, aby dowiedzieć się więcej o algorytmie działania.
-
-
-
 
 ## Instalacja
 
@@ -25,7 +20,7 @@ Do instalacji potrzebnych pakietów, użyj pliku `requirements.txt`, pisząc:
 `$ pip install -r requirements.txt` 
 
 Nie jest zalecane instalowanie tego z poziomu roota (za pomocą pipa jak również managera pakietów), 
-stosuj dockera lub virtualenv (lub podobne rozwiąznaia), aby nie doinstalowywać dodatkowych bibliotek 
+stosuj dockera lub virtualenv (lub podobne rozwiązania), aby nie doinstalowywać dodatkowych bibliotek 
 do Twojego systemu operacyjnego.
 
 Skrypt **nie korzysta z dostępu do API** - w związku z tym nie jest potrzebne nawet bycie zalogowanym 
