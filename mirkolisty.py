@@ -1,8 +1,9 @@
 #!/usr/bin/env python
+
 import sys
+import re
 import configparser
 import requests
-import re
 from bs4 import BeautifulSoup
 
 config = configparser.ConfigParser()
@@ -10,7 +11,7 @@ config = configparser.ConfigParser()
 try:
     config.read("mirkolisty.conf")
 except configparser.MissingSectionHeaderError:
-    print("Error: bad format of config file.")
+    print("Error: bad format of the config file.")
 
 option_list = {
     "baseurl_tag": None,
@@ -27,7 +28,7 @@ option_list = {
 
 there_was_config_error = False
 
-for opt in option_list.keys():
+for opt, value in option_list.items():
     try:
         option_list[opt] = config['DEFAULT'][opt]
     except KeyError as exc:
@@ -72,7 +73,7 @@ for post_num, post_id in enumerate(posts):
 
     for link in soup.find_all('a'):
         # Soup returns strange escape chars - TODO fix instead this shit
-        html = str(link).replace('\/', '/')
+        html = str(link).replace('\\/', '/')
         try:
             login_regex = re.search(option_list.get("login_regex"), html)
             wykop_login = login_regex.group(1)
@@ -82,11 +83,10 @@ for post_num, post_id in enumerate(posts):
                 total_voters_found[wykop_login] = 1
 
             if len(posts)-post_num <= int(option_list.get("how_many_upvotes_for_recent_posts")):
-                if first_analyzed_post == post_id or first_analyzed_post == 0:
+                if first_analyzed_post in [post_id, 0]:
                     first_analyzed_post = post_id
                     voters_recent.append(wykop_login)
-
-                if first_analyzed_post != post_id and first_analyzed_post != 0:
+                else:
                     if wykop_login in voters_recent:
                         temp_users_list.append(wykop_login)
 
@@ -101,10 +101,11 @@ for post_num, post_id in enumerate(posts):
 to_call_usernames = voters_recent
 
 # Now add "prolonged" voters to the call list, skip duplicates
-for username in total_voters_found.keys():
-    if total_voters_found[username] > int(option_list.get("how_many_upvotes_needed_for_prolonged_call")):
-        if username not in to_call_usernames:
-            to_call_usernames.append(username)
+for user, votes in total_voters_found.items():
+    if votes > \
+            int(option_list.get("how_many_upvotes_needed_for_prolonged_call")):
+        if user not in to_call_usernames:
+            to_call_usernames.append(user)
 
 # Posts list to mention
 posts = [option_list.get("baseurl_post") + post_id for post_id in posts]
@@ -116,26 +117,33 @@ how_many_users = len(to_call_usernames)
 try:
     to_call_usernames[0] = '@' + to_call_usernames[0]
     usernames = ' @'.join(to_call_usernames)
-    analyzed_posts_report = ', '.join(posts)
+
+    analyzed_posts_report = "\n".join(posts)
 
     if option_list.get('detail_report') == 'off':
         post_message_with_call = usernames
     else:
         post_message_with_call = f'''
-        Wołam **{how_many_users}** osób na podstawie algorytmu: wołanie za plusy dla {option_list.get("how_many_upvotes_for_recent_posts")} ostatnich materiałów lub plusy dla 
-        minimum {option_list.get("how_many_upvotes_needed_for_prolonged_call")} z {option_list.get("how_many_last_posts_to_analyze")} ostatnich materiałów. Jeśli plusowałeś/aś tylko {option_list.get("how_many_upvotes_for_recent_posts")} ostatnie materiały - nie plusuj posta 
-        rozpoczynającego ten wątek, aby wyłączyć wołanie przy kolejnych wpisach. 
+Wołam **{how_many_users}** osób na podstawie algorytmu: wołanie za plusy dla **{option_list.get("how_many_upvotes_for_recent_posts")}** ostatnich 
+materiałów lub plusy dla przynajmniej **{option_list.get("how_many_upvotes_needed_for_prolonged_call")}** z **{option_list.get("how_many_last_posts_to_analyze")}** ostatnich materiałów. 
 
-        Jeśli plusowałeś/aś {option_list.get("how_many_upvotes_needed_for_prolonged_call")} (lub więcej) poprzednich materiałów - nie plusuj tego i 
-        ewentualnego kolejnego rozpoczynającego posta wątku, aby wyłączyć to wołanie.
+Jeśli plusowałeś/aś tylko **{option_list.get("how_many_upvotes_for_recent_posts")}** ostatnie(-nich) materiały(-ów) - nie plusuj posta 
+rozpoczynającego ten wątek, aby wyłączyć wołanie przy kolejnych wpisach. 
 
-        Wołanych wytypowano na podstawie analizy plusów dla tych wpisów: {analyzed_posts_report}
+Jeśli plusowałeś/aś conajmniej **{option_list.get("how_many_upvotes_needed_for_prolonged_call")}** z **{option_list.get("how_many_last_posts_to_analyze")}** poprzednich materiałów, w tej sytuacji,
+aby wyłączyć wołanie, nie plusuj nowych wpisów tak długo, aż liczba Twoich plusów dla 
+**{option_list.get("how_many_last_posts_to_analyze")}** ostatnich materiałów spadnie poniżej liczby **{option_list.get("how_many_upvotes_for_recent_posts")}** 
 
-        Analizowano jedynie wpisy, które mają w treści: **{option_list.get("post_pattern")}**
+Wołanych wytypowano na podstawie analizy plusów dla tych poniższych wpisów: 
 
-        Wołam: {usernames}
-        '''
-except IndexError:
-    post_message_with_call = "Nikogo nie wołam na podstawie takiej konfiguracji lub nikt nie plusuje :-("
+{analyzed_posts_report}
+
+Analizowano jedynie wpisy, które mają w treści: **{option_list.get("post_pattern")}**
+
+Wołam: {usernames}'''
+
+except (IndexError, KeyError) as asx:
+    post_message_with_call = "Nikogo nie wołam na podstawie takiej konfiguracji i braku wymaganych plusów" +\
+                             f"lub wystąpił nieoczekiwany problem: {asx}"
 
 print(post_message_with_call)
