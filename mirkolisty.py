@@ -102,8 +102,7 @@ to_call_usernames = voters_recent
 
 # Now add "prolonged" voters to the call list, skip duplicates
 for user, votes in total_voters_found.items():
-    if votes > \
-            int(option_list.get("how_many_upvotes_needed_for_prolonged_call")):
+    if votes > int(option_list.get("how_many_upvotes_needed_for_prolonged_call")):
         if user not in to_call_usernames:
             to_call_usernames.append(user)
 
@@ -142,8 +141,8 @@ Analizowano jedynie wpisy, które mają w treści: **{option_list.get("post_patt
 
 Wołam: {usernames}'''
 
-except (IndexError, KeyError) as asx:
-    post_message_with_call = "Nikogo nie wołam na podstawie takiej konfiguracji i braku wymaganych plusów" +\
-                             f"lub wystąpił nieoczekiwany problem: {asx}"
+except (IndexError, KeyError) as exc:
+    post_message_with_call = "Nikogo nie wołam na podstawie takiej konfiguracji i braku " + \
+                             f"wymaganych plusów lub wystąpił nieoczekiwany problem: {exc}"
 
 print(post_message_with_call)
