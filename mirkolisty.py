@@ -70,6 +70,7 @@ posts.reverse()
 for post_num, post_id in enumerate(posts):
     req = requests.get(option_list.get("voters_endpoint") + post_id)
     soup = BeautifulSoup(req.content, 'html.parser')
+    print(f"Analyzing post {option_list.get('baseurl_post') + post_id}...")
 
     for link in soup.find_all('a'):
         # Soup returns strange escape chars - TODO fix instead this shit
@@ -131,7 +132,7 @@ rozpoczynającego ten wątek, aby wyłączyć wołanie przy kolejnych wpisach.
 
 Jeśli plusowałeś/aś conajmniej **{option_list.get("how_many_upvotes_needed_for_prolonged_call")}** z **{option_list.get("how_many_last_posts_to_analyze")}** poprzednich materiałów, w tej sytuacji,
 aby wyłączyć wołanie, nie plusuj nowych wpisów tak długo, aż liczba Twoich plusów dla 
-**{option_list.get("how_many_last_posts_to_analyze")}** ostatnich materiałów spadnie poniżej liczby **{option_list.get("how_many_upvotes_for_recent_posts")}** 
+**{option_list.get("how_many_last_posts_to_analyze")}** ostatnich materiałów spadnie poniżej liczby **{option_list.get("how_many_upvotes_needed_for_prolonged_call")}** 
 
 Wołanych wytypowano na podstawie analizy plusów dla tych poniższych wpisów: 
 
